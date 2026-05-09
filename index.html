@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>辅导员学生管理系统 v2</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+:root {
+  --primary: #0071e3;
+  --primary-hover: #0077ed;
+  --primary-light: #e8f4fd;
+  --success: #34c759;
+  --success-light: #e8faf0;
+  --warning: #ff9500;
+  --warning-light: #fff5e6;
+  --danger: #ff3b30;
+  --danger-light: #ffeceb;
+  --bg: #f5f5f7;
+  --card: #ffffff;
+  --sidebar-bg: #ffffff;
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-tertiary: #aeaeb2;
+  --separator: #e5e5e7;
+  --hover: rgba(0,0,0,0.04);
+  --radius: 16px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
+  --radius-pill: 9999px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+  --shadow-xl: 0 20px 60px rgba(0,0,0,0.15);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  --sidebar-width: 260px;
+  --bottom-nav-height: 84px;
+}
+
+html { height: 100%; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Sidebar (Desktop) ===== */
+.sidebar {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: var(--sidebar-width);
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--separator);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sidebar-brand {
+  padding: 28px 24px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sidebar-brand .brand-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--primary), #5856d6);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.sidebar-brand h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+}
+.sidebar-brand small {
+  display: block;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+  margin-top: 1px;
+}
+.sidebar nav {
+  flex: 1;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+.sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--radius-xs);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+.sidebar nav a:hover {
+  background: var(--hover);
+  color: var(--text-primary);
+}
+.sidebar nav a.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 600;
+}
+.sidebar nav a.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: var(--primary);
+  border-radius: 0 3px 3px 0;
+}
+.sidebar nav a .icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.sidebar-nav-divider {
+  padding: 8px 14px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--separator);
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+/* ===== Main Content ===== */
+.main {
+  margin-left: var(--sidebar-width);
+  padding: 32px 40px;
+  min-height: 100vh;
+  transition: margin 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.page { display: none; animation: pageIn 0.3s ease; }
+.page.active { display: block; }
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Page Header ===== */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.page-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 44px;
+  line-height: 1;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 1px 3px rgba(0,113,227,0.3);
+}
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-outline {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--separator);
+}
+.btn-outline:hover { background: var(--hover); }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: #e0342b; }
+.btn-sm { padding: 6px 14px; font-size: 13px; min-height: 32px; }
+
+/* ===== Cards ===== */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.card-header {
+  padding: 18px 22px 0;
+}
+.card-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ===== Stats Grid ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.stat-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+.stat-icon {
+  width: 48px; height: 48px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.stat-icon.blue { background: var(--primary-light); }
+.stat-icon.green { background: var(--success-light); }
+.stat-icon.yellow { background: var(--warning-light); }
+.stat-icon.red { background: var(--danger-light); }
+.stat-icon.purple { background: #f3e8ff; }
+.stat-info h4 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+.stat-info p { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+/* ===== Category Stats ===== */
+.category-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.category-card {
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+.category-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+.category-card .cat-icon { font-size: 28px; margin-bottom: 6px; }
+.category-card .cat-count { font-size: 20px; font-weight: 700; }
+.category-card .cat-label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+/* ===== Tags ===== */
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+}
+.tag-blue { background: var(--primary-light); color: var(--primary); }
+.tag-green { background: var(--success-light); color: var(--success); }
+.tag-yellow { background: var(--warning-light); color: var(--warning); }
+.tag-red { background: var(--danger-light); color: var(--danger); }
+.tag-gray { background: #f0f0f0; color: var(--text-secondary); }
+
+/* ===== Search Bar ===== */
+.search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.search-bar input, .search-bar select {
+  padding: 10px 16px;
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-family: var(--font);
+  background: var(--card);
+  outline: none;
+  transition: border-color 0.2s;
+  min-height: 44px;
+}
+.search-bar input:focus, .search-bar select:focus {
+  border-color: var(--primary);
+}
+.search-bar input { flex: 1; min-width: 200px; }
+
+/* ===== Data Table ===== */
+.table-wrapper { overflow-x: auto; }
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-table th, .data-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--separator);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.data-table th {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.data-table tbody tr:hover { background: var(--hover); }
+.data-table td a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+.data-table td a:hover { text-decoration: underline; }
+
+/* ===== Empty State ===== */
+.empty-state {
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--text-tertiary);
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+/* ===== Schedule ===== */
+.schedule-list { padding: 0 22px 18px; }
+.schedule-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--separator);
+}
+.schedule-item:last-child { border-bottom: none; }
+.schedule-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.schedule-info { flex: 1; }
+.schedule-info h4 { font-size: 14px; font-weight: 600; }
+.schedule-info p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.schedule-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* ===== Calendar ===== */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--separator);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.cal-header {
+  background: var(--bg);
+  padding: 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.cal-day {
+  background: var(--card);
+  padding: 10px;
+  min-height: 80px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.cal-day:hover { background: var(--hover); }
+.cal-day.today { background: var(--primary-light); }
+.cal-day.other-month { background: var(--bg); cursor: default; }
+.cal-day .day-num { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.cal-day.today .day-num { color: var(--primary); }
+.cal-day.other-month .day-num { color: var(--text-tertiary); }
+.cal-event {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: white;
+}
+.cal-event.blue { background: var(--primary); }
+.cal-event.green { background: var(--success); }
+.cal-event.yellow { background: var(--warning); }
+.cal-event.red { background: var(--danger); }
+.cal-event.gray { background: var(--text-tertiary); }
+.cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+.cal-nav h3 { font-size: 18px; font-weight: 700; }
+
+/* ===== Tabs ===== */
+.tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--bg);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+  margin-bottom: 18px;
+  overflow-x: auto;
+}
+.tab {
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+.tab.active {
+  background: var(--card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ===== Modal ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s;
+}
+.modal-overlay.show { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: var(--card);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes slideUp { from { transform: translateY(20px); } to { transform: translateY(0); } }
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--separator);
+}
+.modal-header h3 { font-size: 18px; font-weight: 700; }
+.modal-close {
+  width: 32px; height: 32px;
+  border: none; background: var(--hover);
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.modal-close:hover { background: var(--separator); }
+.modal-body { padding: 24px; }
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--separator);
+}
+
+/* ===== Form ===== */
+.form-group { margin-bottom: 16px; }
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-xs);
+  font-size: 14px;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--primary);
+}
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* ===== Category Fields in Modal ===== */
+.category-fields {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--separator);
+}
+.category-fields h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+.category-field-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--separator);
+}
+.category-field-row:last-child { border-bottom: none; }
+.category-field-row .cat-label {
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 80px;
+}
+.category-field-row input[type="checkbox"] {
+  width: 18px; height: 18px;
+  accent-color: var(--primary);
+  flex-shrink: 0;
+}
+.category-field-row input[type="text"] {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  font-family: var(--font);
+  outline: none;
+}
+.category-field-row input[type="text"]:focus { border-color: var(--primary); }
+
+/* ===== Student Detail Page ===== */
+.detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 20px;
+  padding: 8px 0;
+}
+.detail-back:hover { text-decoration: underline; }
+.detail-section {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.detail-section h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.detail-field { font-size: 14px; }
+.detail-field .label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.detail-field .value { color: var(--text-primary); }
+.detail-category-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.detail-cat-card {
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--separator);
+}
+.detail-cat-card.enabled {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+.detail-cat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.detail-cat-header .cat-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+.detail-cat-note {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ===== Bottom Nav (Mobile) ===== */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--bottom-nav-height);
+  background: var(--card);
+  border-top: 1px solid var(--separator);
+  z-index: 100;
+  justify-content: space-around;
+  align-items: center;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bottom-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--radius-xs);
+  transition: color 0.2s;
+}
+.bottom-nav a .icon { font-size: 22px; }
+.bottom-nav a.active { color: var(--primary); }
+
+/* ===== Reminder Badge ===== */
+.reminder-badge {
+  position: fixed;
+  bottom: 100px;
+  right: 16px;
+  background: var(--primary);
+  color: white;
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  z-index: 150;
+  display: none;
+  animation: slideUp 0.3s;
+}
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text-primary);
+  color: white;
+  padding: 12px 24px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 300;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .bottom-nav { display: flex; }
+  .main {
+    margin-left: 0;
+    padding: 20px 16px;
+    padding-bottom: calc(var(--bottom-nav-height) + 16px);
+  }
+  .page-header h1 { font-size: 22px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat-card { padding: 14px; gap: 10px; }
+  .stat-icon { width: 40px; height: 40px; font-size: 18px; }
+  .stat-info h4 { font-size: 20px; }
+  .category-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .category-card { padding: 12px; }
+  .category-card .cat-icon { font-size: 22px; }
+  .category-card .cat-count { font-size: 16px; }
+  .data-table th:nth-child(n+5), .data-table td:nth-child(n+5) { display: none; }
+  .search-bar input { min-width: 120px; }
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .detail-category-grid { grid-template-columns: 1fr; }
+  .cal-nav { display: none; }
+  .reminder-badge { bottom: calc(var(--bottom-nav-height) + 12px); right: 16px; left: 16px; text-align: center; }
+  .toast { bottom: calc(var(--bottom-nav-height) + 20px); }
+}
+@media (min-width: 769px) {
+  .cal-mobile-list { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Desktop Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">🎓</div>
+    <div>
+      <h2>辅导员助手</h2>
+      <small>Student Management</small>
+    </div>
+  </div>
+  <nav>
+    <a onclick="showPage('dashboard')" class="active" data-page="dashboard"><span class="icon">📊</span><span>工作台</span></a>
+    <a onclick="showPage('students')" data-page="students"><span class="icon">👥</span><span>学生信息</span></a>
+    <a onclick="showPage('schedule')" data-page="schedule"><span class="icon">📅</span><span>日程管理</span></a>
+    <div class="sidebar-nav-divider">分类筛选</div>
+    <a onclick="filterByCategory('资助')" data-page="cat-资助"><span class="icon">💰</span><span>资助</span></a>
+    <a onclick="filterByCategory('奖助')" data-page="cat-奖助"><span class="icon">🏆</span><span>奖助</span></a>
+    <a onclick="filterByCategory('学业')" data-page="cat-学业"><span class="icon">📚</span><span>学业</span></a>
+    <a onclick="filterByCategory('党建')" data-page="cat-党建"><span class="icon">🔴</span><span>党建</span></a>
+    <a onclick="filterByCategory('心理')" data-page="cat-心理"><span class="icon">🧠</span><span>心理</span></a>
+  </nav>
+  <div class="sidebar-footer">© 2026 辅导员助手 v2</div>
+</aside>
+
+<!-- Mobile Bottom Nav -->
+<nav class="bottom-nav">
+  <a onclick="showPage('dashboard')" class="active" data-page="dashboard"><span class="icon">📊</span><span>工作台</span></a>
+  <a onclick="showPage('students')" data-page="students"><span class="icon">👥</span><span>学生</span></a>
+  <a onclick="showPage('schedule')" data-page="schedule"><span class="icon">📅</span><span>日程</span></a>
+</nav>
+
+<div class="main">
+  <!-- ===== Dashboard ===== -->
+  <div id="page-dashboard" class="page active">
+    <div class="page-header">
+      <h1>📊 工作台</h1>
+      <span id="dash-date" style="color:var(--text-secondary);font-size:14px;font-weight:500;"></span>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card" onclick="showPage('students')"><div class="stat-icon blue">👥</div><div class="stat-info"><h4 id="stat-total">0</h4><p>学生总数</p></div></div>
+      <div class="stat-card" onclick="showPage('schedule')"><div class="stat-icon green">📅</div><div class="stat-info"><h4 id="stat-today">0</h4><p>今日日程</p></div></div>
+      <div class="stat-card" onclick="showPage('schedule')"><div class="stat-icon yellow">📋</div><div class="stat-info"><h4 id="stat-upcoming">0</h4><p>近7天日程</p></div></div>
+      <div class="stat-card" onclick="showPage('students')"><div class="stat-icon purple">🔔</div><div class="stat-info"><h4 id="stat-pending">0</h4><p>待办事项</p></div></div>
+    </div>
+    <div class="category-stats">
+      <div class="category-card" onclick="filterByCategory('资助')"><div class="cat-icon">💰</div><div class="cat-count" id="cat-count-资助">0</div><div class="cat-label">资助</div></div>
+      <div class="category-card" onclick="filterByCategory('奖助')"><div class="cat-icon">🏆</div><div class="cat-count" id="cat-count-奖助">0</div><div class="cat-label">奖助</div></div>
+      <div class="category-card" onclick="filterByCategory('学业')"><div class="cat-icon">📚</div><div class="cat-count" id="cat-count-学业">0</div><div class="cat-label">学业</div></div>
+      <div class="category-card" onclick="filterByCategory('党建')"><div class="cat-icon">🔴</div><div class="cat-count" id="cat-count-党建">0</div><div class="cat-label">党建</div></div>
+      <div class="category-card" onclick="filterByCategory('心理')"><div class="cat-icon">🧠</div><div class="cat-count" id="cat-count-心理">0</div><div class="cat-label">心理</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="dash-grid">
+      <div class="card"><div class="card-header"><h3>📅 近期日程</h3></div><div id="dash-schedule-list" class="schedule-list"></div></div>
+      <div class="card"><div class="card-header"><h3>👥 学生动态</h3></div><div id="dash-student-list" style="padding:0 22px 18px;"></div></div>
+    </div>
+  </div>
+
+  <!-- ===== Students ===== -->
+  <div id="page-students" class="page">
+    <div class="page-header">
+      <h1>👥 学生信息管理</h1>
+      <button class="btn btn-primary" onclick="openStudentModal()">＋ 添加学生</button>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="stu-search" placeholder="搜索姓名、学号、班级..." oninput="renderStudents()">
+      <select id="stu-filter" onchange="renderStudents()"><option value="">全部班级</option><option value="2021级">2021级</option><option value="2022级">2022级</option><option value="2023级">2023级</option><option value="2024级">2024级</option></select>
+      <select id="stu-gender-filter" onchange="renderStudents()"><option value="">全部性别</option><option value="男">男</option><option value="女">女</option></select>
+      <select id="stu-cat-filter" onchange="renderStudents()"><option value="">全部分类</option><option value="资助">💰 资助</option><option value="奖助">🏆 奖助</option><option value="学业">📚 学业</option><option value="党建">🔴 党建</option><option value="心理">🧠 心理</option></select>
+    </div>
+    <div class="card">
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr><th>学号</th><th>姓名</th><th>性别</th><th>班级</th><th>电话</th><th>宿舍</th><th>政治面貌</th><th>分类</th><th>操作</th></tr>
+          </thead>
+          <tbody id="stu-table-body"></tbody>
+        </table>
+      </div>
+      <div id="stu-empty" class="empty-state" style="display:none;"><div class="icon">📭</div><p>暂无学生数据，点击"添加学生"开始</p></div>
+    </div>
+  </div>
+
+  <!-- ===== Student Detail (replaces modal) ===== -->
+  <div id="page-student-detail" class="page">
+    <div class="detail-back" onclick="showPage('students')">← 返回学生列表</div>
+    <div id="student-detail-content"></div>
+  </div>
+
+  <!-- ===== Schedule ===== -->
+  <div id="page-schedule" class="page">
+    <div class="page-header">
+      <h1>📅 日程管理</h1>
+      <button class="btn btn-primary" onclick="openScheduleModal()">＋ 添加日程</button>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchScheduleTab('calendar')">📅 日历视图</div>
+      <div class="tab" onclick="switchScheduleTab('list')">📋 列表视图</div>
+    </div>
+    <div id="sche-tab-calendar" class="tab-content active">
+      <div class="cal-nav">
+        <button class="btn btn-outline btn-sm" onclick="calMove(-1)">◀</button>
+        <h3 id="cal-title"></h3>
+        <button class="btn btn-outline btn-sm" onclick="calMove(1)">▶</button>
+        <button class="btn btn-outline btn-sm" onclick="calToday()" style="margin-left:8px;">今天</button>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+      <div class="cal-mobile-list" id="cal-mobile-list" style="display:none;"></div>
+    </div>
+    <div id="sche-tab-list" class="tab-content">
+      <div id="schedule-list-view" class="schedule-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Student Modal ===== -->
+<div class="modal-overlay" id="student-modal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="stu-modal-title">添加学生</h3><button class="modal-close" onclick="closeModal('student-modal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="stu-edit-id">
+      <div class="form-row">
+        <div class="form-group"><label>学号 *</label><input type="text" id="stu-id-input" placeholder="如 2024001"></div>
+        <div class="form-group"><label>姓名 *</label><input type="text" id="stu-name-input" placeholder="学生姓名"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>性别</label><select id="stu-gender-input"><option value="男">男</option><option value="女">女</option></select></div>
+        <div class="form-group"><label>班级</label><select id="stu-class-input"><option value="2021级">2021级</option><option value="2022级">2022级</option><option value="2023级">2023级</option><option value="2024级" selected>2024级</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>电话</label><input type="text" id="stu-phone-input" placeholder="手机号"></div>
+        <div class="form-group"><label>宿舍</label><input type="text" id="stu-dorm-input" placeholder="如 梅园3-401"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>政治面貌</label><select id="stu-political-input"><option value="群众">群众</option><option value="共青团员">共青团员</option><option value="中共预备党员">中共预备党员</option><option value="中共党员">中共党员</option></select></div>
+        <div class="form-group"><label>生日</label><input type="date" id="stu-birthday-input"></div>
+      </div>
+      <div class="form-group"><label>备注</label><textarea id="stu-note-input" placeholder="特殊情况、贫困认定等"></textarea></div>
+      <div class="category-fields">
+        <h4>📂 分类信息</h4>
+        <div class="category-field-row"><span class="cat-label">💰 资助</span><input type="checkbox" id="cat-资助-enabled"><input type="text" id="cat-资助-note" placeholder="资助备注"></div>
+        <div class="category-field-row"><span class="cat-label">🏆 奖助</span><input type="checkbox" id="cat-奖助-enabled"><input type="text" id="cat-奖助-note" placeholder="奖助备注"></div>
+        <div class="category-field-row"><span class="cat-label">📚 学业</span><input type="checkbox" id="cat-学业-enabled"><input type="text" id="cat-学业-note" placeholder="学业备注"></div>
+        <div class="category-field-row"><span class="cat-label">🔴 党建</span><input type="checkbox" id="cat-党建-enabled"><input type="text" id="cat-党建-note" placeholder="党建备注"></div>
+        <div class="category-field-row"><span class="cat-label">🧠 心理</span><input type="checkbox" id="cat-心理-enabled"><input type="text" id="cat-心理-note" placeholder="心理备注"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('student-modal')">取消</button><button class="btn btn-primary" onclick="saveStudent()">保存</button></div>
+  </div>
+</div>
+
+<!-- ===== Schedule Modal ===== -->
+<div class="modal-overlay" id="schedule-modal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="sche-modal-title">添加日程</h3><button class="modal-close" onclick="closeModal('schedule-modal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="sche-edit-id">
+      <div class="form-group"><label>日程标题 *</label><input type="text" id="sche-title-input" placeholder="如：年级大会"></div>
+      <div class="form-row">
+        <div class="form-group"><label>日期 *</label><input type="date" id="sche-date-input"></div>
+        <div class="form-group"><label>时间</label><input type="time" id="sche-time-input"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>分类</label><select id="sche-cat-input"><option value="blue">🔵 工作</option><option value="green">🟢 个人</option><option value="yellow">🟡 会议</option><option value="red">🔴 紧急</option></select></div>
+        <div class="form-group"><label>提醒</label><select id="sche-remind-input"><option value="0">不提醒</option><option value="15">提前15分钟</option><option value="30" selected>提前30分钟</option><option value="60">提前1小时</option><option value="1440">提前1天</option></select></div>
+      </div>
+      <div class="form-group"><label>备注</label><textarea id="sche-note-input" placeholder="地点、参会人等"></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('schedule-modal')">取消</button><button class="btn btn-primary" onclick="saveSchedule()">保存</button></div>
+  </div>
+</div>
+
+<div class="reminder-badge" id="reminder-badge" onclick="dismissReminder()">🔔 <span id="reminder-text"></span></div>
+<div class="toast" id="toast"></div>
+
+<!-- 认证失败提示 -->
+<div class="modal-overlay" id="login-modal" style="z-index:9999;">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-header"><h3>🔒 需要认证</h3></div>
+    <div class="modal-body" style="text-align:center;">
+      <div style="font-size:48px;margin-bottom:12px;">🔐</div>
+      <div style="font-size:14px;color:var(--text-secondary);margin-bottom:8px;">浏览器会弹出认证框，请输入用户名和密码</div>
+      <div style="font-size:13px;color:var(--text-tertiary);">如果认证框未出现，请刷新页面</div>
+    </div>
+    <div class="modal-footer" style="justify-content:center;">
+      <button class="btn btn-primary" style="width:100%;" onclick="location.reload()">重新加载</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== API Layer =====
+const Auth = {
+  getToken() { return sessionStorage.getItem('counselor_token'); },
+  setToken(t) { sessionStorage.setItem('counselor_token', t); },
+  clear() { sessionStorage.removeItem('counselor_token'); },
+  isLoggedIn() { return !!this.getToken(); },
+};
+
+const API = {
+  async request(method, url, body) {
+    const token = Auth.getToken();
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const opts = { method, headers };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(url, opts);
+    if (res.status === 401) {
+      Auth.clear();
+      showAuthRequired();
+      throw new Error('Unauthorized');
+    }
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    return res.json();
+  },
+  getStudents()     { return this.request('GET', '/api/students'); },
+  getStudent(id)    { return this.request('GET', `/api/students/${id}`); },
+  createStudent(d)  { return this.request('POST', '/api/students', d); },
+  updateStudent(id, d) { return this.request('PUT', `/api/students/${id}`, d); },
+  deleteStudent(id) { return this.request('DELETE', `/api/students/${id}`); },
+  getSchedules()     { return this.request('GET', '/api/schedules'); },
+  createSchedule(d)  { return this.request('POST', '/api/schedules', d); },
+  updateSchedule(id, d) { return this.request('PUT', `/api/schedules/${id}`, d); },
+  deleteSchedule(id) { return this.request('DELETE', `/api/schedules/${id}`); },
+};
+
+let students = [], schedules = [];
+let calendarDate = new Date();
+let remindedSet = new Set();
+let currentCategoryFilter = '';
+
+// ===== Responsive helpers =====
+function isMobile() { return window.innerWidth <= 768; }
+
+// ===== Navigation =====
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pageEl = document.getElementById('page-' + name);
+  if (pageEl) pageEl.classList.add('active');
+  // Update sidebar
+  document.querySelectorAll('.sidebar nav a').forEach(a => {
+    const dp = a.dataset.page;
+    a.classList.toggle('active', dp === name || dp === 'cat-' + currentCategoryFilter);
+  });
+  // Update bottom nav
+  document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.toggle('active', a.dataset.page === name));
+  if (name === 'dashboard') refreshDashboard();
+  if (name === 'students') renderStudents();
+  if (name === 'schedule') { renderCalendar(); renderScheduleList(); }
+}
+
+function filterByCategory(cat) {
+  currentCategoryFilter = cat;
+  document.getElementById('stu-cat-filter').value = cat;
+  showPage('students');
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+});
+
+// ===== Students =====
+async function loadStudents() { students = await API.getStudents(); }
+async function loadSchedules() { schedules = await API.getSchedules(); }
+
+function openStudentModal(id) {
+  const modal = document.getElementById('student-modal');
+  const catNames = ['资助', '奖助', '学业', '党建', '心理'];
+  if (id) {
+    const s = students.find(x => x.id === id);
+    if (!s) return;
+    document.getElementById('stu-modal-title').textContent = '编辑学生';
+    document.getElementById('stu-edit-id').value = id;
+    document.getElementById('stu-id-input').value = s.studentId;
+    document.getElementById('stu-name-input').value = s.name;
+    document.getElementById('stu-gender-input').value = s.gender;
+    document.getElementById('stu-class-input').value = s.className;
+    document.getElementById('stu-phone-input').value = s.phone || '';
+    document.getElementById('stu-dorm-input').value = s.dorm || '';
+    document.getElementById('stu-political-input').value = s.political || '群众';
+    document.getElementById('stu-birthday-input').value = s.birthday || '';
+    document.getElementById('stu-note-input').value = s.note || '';
+    catNames.forEach(c => {
+      const cat = (s.categories || {})[c] || {};
+      document.getElementById('cat-' + c + '-enabled').checked = !!cat.enabled;
+      document.getElementById('cat-' + c + '-note').value = cat.note || '';
+    });
+  } else {
+    document.getElementById('stu-modal-title').textContent = '添加学生';
+    document.getElementById('stu-edit-id').value = '';
+    ['stu-id-input','stu-name-input','stu-phone-input','stu-dorm-input','stu-birthday-input','stu-note-input'].forEach(i => document.getElementById(i).value = '');
+    document.getElementById('stu-gender-input').value = '男';
+    document.getElementById('stu-class-input').value = '2024级';
+    document.getElementById('stu-political-input').value = '群众';
+    catNames.forEach(c => {
+      document.getElementById('cat-' + c + '-enabled').checked = false;
+      document.getElementById('cat-' + c + '-note').value = '';
+    });
+  }
+  modal.classList.add('show');
+}
+
+async function saveStudent() {
+  const studentId = document.getElementById('stu-id-input').value.trim();
+  const name = document.getElementById('stu-name-input').value.trim();
+  if (!studentId || !name) { toast('请填写学号和姓名'); return; }
+  const catNames = ['资助', '奖助', '学业', '党建', '心理'];
+  const categories = {};
+  catNames.forEach(c => {
+    categories[c] = {
+      enabled: document.getElementById('cat-' + c + '-enabled').checked,
+      note: document.getElementById('cat-' + c + '-note').value.trim()
+    };
+  });
+  const data = {
+    studentId, name,
+    gender: document.getElementById('stu-gender-input').value,
+    className: document.getElementById('stu-class-input').value,
+    phone: document.getElementById('stu-phone-input').value.trim(),
+    dorm: document.getElementById('stu-dorm-input').value.trim(),
+    political: document.getElementById('stu-political-input').value,
+    birthday: document.getElementById('stu-birthday-input').value,
+    note: document.getElementById('stu-note-input').value.trim(),
+    categories,
+  };
+  const editId = document.getElementById('stu-edit-id').value;
+  if (editId) {
+    await API.updateStudent(editId, data);
+  } else {
+    await API.createStudent(data);
+  }
+  await loadStudents();
+  closeModal('student-modal');
+  renderStudents();
+  toast(editId ? '学生信息已更新' : '学生已添加');
+}
+
+async function deleteStudent(id) {
+  if (!confirm('确定删除该学生？')) return;
+  await API.deleteStudent(id);
+  await loadStudents();
+  renderStudents();
+  showPage('students');
+  toast('已删除');
+}
+
+function viewStudent(id) {
+  const s = students.find(x => x.id === id);
+  if (!s) return;
+  const catNames = ['资助', '奖助', '学业', '党建', '心理'];
+  const catIcons = { '资助': '💰', '奖助': '🏆', '学业': '📚', '党建': '🔴', '心理': '🧠' };
+  const cats = s.categories || {};
+  const catHtml = catNames.map(c => {
+    const cat = cats[c] || {};
+    const enabled = !!cat.enabled;
+    return `<div class="detail-cat-card ${enabled ? 'enabled' : ''}">
+      <div class="detail-cat-header">
+        <span class="cat-name">${catIcons[c]} ${c}</span>
+        <span class="tag ${enabled ? 'tag-green' : 'tag-gray'}">${enabled ? '已启用' : '未启用'}</span>
+      </div>
+      ${cat.note ? `<div class="detail-cat-note">${cat.note}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  document.getElementById('student-detail-content').innerHTML = `
+    <div class="detail-section">
+      <h3>📋 基本信息</h3>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="label">学号</div><div class="value">${s.studentId}</div></div>
+        <div class="detail-field"><div class="label">姓名</div><div class="value">${s.name}</div></div>
+        <div class="detail-field"><div class="label">性别</div><div class="value">${s.gender}</div></div>
+        <div class="detail-field"><div class="label">班级</div><div class="value">${s.className}</div></div>
+        <div class="detail-field"><div class="label">电话</div><div class="value">${s.phone || '-'}</div></div>
+        <div class="detail-field"><div class="label">宿舍</div><div class="value">${s.dorm || '-'}</div></div>
+        <div class="detail-field"><div class="label">政治面貌</div><div class="value">${s.political || '-'}</div></div>
+        <div class="detail-field"><div class="label">生日</div><div class="value">${s.birthday || '-'}</div></div>
+      </div>
+      ${s.note ? `<div style="margin-top:16px;padding:14px;background:var(--bg);border-radius:var(--radius-xs);font-size:14px;"><strong style="color:var(--text-secondary);">备注</strong><br>${s.note}</div>` : ''}
+    </div>
+    <div class="detail-section">
+      <h3>📂 分类信息</h3>
+      <div class="detail-category-grid">${catHtml}</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn btn-primary" onclick="openStudentModal('${s.id}'); showPage('students');">✏️ 编辑学生</button>
+      <button class="btn btn-danger" onclick="deleteStudent('${s.id}')">🗑 删除学生</button>
+    </div>`;
+  showPage('student-detail');
+}
+
+function renderStudents() {
+  const q = document.getElementById('stu-search').value.toLowerCase();
+  const cls = document.getElementById('stu-filter').value;
+  const gender = document.getElementById('stu-gender-filter').value;
+  const catFilter = document.getElementById('stu-cat-filter').value;
+  const catIcons = { '资助': '💰', '奖助': '🏆', '学业': '📚', '党建': '🔴', '心理': '🧠' };
+
+  const filtered = students.filter(s => {
+    if (cls && s.className !== cls) return false;
+    if (gender && s.gender !== gender) return false;
+    if (catFilter) {
+      const cat = (s.categories || {})[catFilter];
+      if (!cat || !cat.enabled) return false;
+    }
+    if (q && !(s.name.toLowerCase().includes(q) || s.studentId.toLowerCase().includes(q) || (s.className||'').toLowerCase().includes(q))) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('stu-table-body');
+  const empty = document.getElementById('stu-empty');
+  if (filtered.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  const politicalTag = (p) => {
+    if (p === '中共党员') return 'tag-red';
+    if (p === '中共预备党员') return 'tag-yellow';
+    if (p === '共青团员') return 'tag-green';
+    return 'tag-gray';
+  };
+
+  const getStudentCategories = (s) => {
+    const cats = s.categories || {};
+    return Object.keys(cats).filter(c => cats[c] && cats[c].enabled).map(c => `<span class="tag tag-blue">${catIcons[c]}${c}</span>`).join(' ');
+  };
+
+  tbody.innerHTML = filtered.map(s => `
+    <tr>
+      <td>${s.studentId}</td>
+      <td><a onclick="viewStudent('${s.id}')">${s.name}</a></td>
+      <td>${s.gender}</td>
+      <td><span class="tag tag-blue">${s.className}</span></td>
+      <td>${s.phone || '-'}</td>
+      <td>${s.dorm || '-'}</td>
+      <td><span class="tag ${politicalTag(s.political)}">${s.political || '-'}</span></td>
+      <td>${getStudentCategories(s) || '-'}</td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-outline btn-sm" onclick="viewStudent('${s.id}')">查看</button>
+          <button class="btn btn-outline btn-sm" onclick="openStudentModal('${s.id}')">编辑</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">删除</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+// ===== Schedule =====
+function openScheduleModal(id) {
+  const modal = document.getElementById('schedule-modal');
+  if (id) {
+    const s = schedules.find(x => x.id === id);
+    if (!s) return;
+    document.getElementById('sche-modal-title').textContent = '编辑日程';
+    document.getElementById('sche-edit-id').value = id;
+    document.getElementById('sche-title-input').value = s.title;
+    document.getElementById('sche-date-input').value = s.date;
+    document.getElementById('sche-time-input').value = s.time || '';
+    document.getElementById('sche-cat-input').value = s.category || 'blue';
+    document.getElementById('sche-remind-input').value = s.remind || '0';
+    document.getElementById('sche-note-input').value = s.note || '';
+  } else {
+    document.getElementById('sche-modal-title').textContent = '添加日程';
+    document.getElementById('sche-edit-id').value = '';
+    document.getElementById('sche-title-input').value = '';
+    document.getElementById('sche-date-input').value = new Date().toISOString().split('T')[0];
+    document.getElementById('sche-time-input').value = '';
+    document.getElementById('sche-cat-input').value = 'blue';
+    document.getElementById('sche-remind-input').value = '30';
+    document.getElementById('sche-note-input').value = '';
+  }
+  modal.classList.add('show');
+}
+
+async function saveSchedule() {
+  const title = document.getElementById('sche-title-input').value.trim();
+  const date = document.getElementById('sche-date-input').value;
+  if (!title || !date) { toast('请填写标题和日期'); return; }
+  const data = {
+    title, date,
+    time: document.getElementById('sche-time-input').value,
+    category: document.getElementById('sche-cat-input').value,
+    remind: document.getElementById('sche-remind-input').value,
+    note: document.getElementById('sche-note-input').value.trim(),
+  };
+  const editId = document.getElementById('sche-edit-id').value;
+  if (editId) { await API.updateSchedule(editId, data); }
+  else { await API.createSchedule(data); }
+  await loadSchedules();
+  closeModal('schedule-modal');
+  renderCalendar(); renderScheduleList();
+  toast(editId ? '日程已更新' : '日程已添加');
+}
+
+async function deleteSchedule(id) {
+  if (!confirm('确定删除该日程？')) return;
+  await API.deleteSchedule(id);
+  await loadSchedules();
+  renderCalendar(); renderScheduleList();
+  toast('已删除');
+}
+
+function renderScheduleList() {
+  const container = document.getElementById('schedule-list-view');
+  const dashList = document.getElementById('dash-schedule-list');
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  const sorted = [...schedules].sort((a, b) => (a.date + (a.time||'')).localeCompare(b.date + (b.time||'')));
+  const upcoming = sorted.filter(s => s.date >= todayStr);
+  const colors = { blue: 'var(--primary)', green: 'var(--success)', yellow: 'var(--warning)', red: 'var(--danger)' };
+
+  function renderList(items, target) {
+    if (items.length === 0) { target.innerHTML = '<div class="empty-state" style="padding:20px;"><p>暂无日程</p></div>'; return; }
+    target.innerHTML = items.slice(0, 10).map(s => {
+      const isToday = s.date === todayStr;
+      return `<div class="schedule-item" style="${isToday ? 'border-left:3px solid var(--primary);' : ''}">
+        <div class="schedule-dot" style="background:${colors[s.category]||colors.blue}"></div>
+        <div class="schedule-info"><h4>${s.title} ${isToday ? '<span class="tag tag-blue">今天</span>' : ''}</h4><p>${s.date} ${s.time || ''} ${s.note ? '· ' + s.note : ''}</p></div>
+        <div class="schedule-actions">
+          <button class="btn btn-outline btn-sm" onclick="openScheduleModal('${s.id}')">编辑</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteSchedule('${s.id}')">删除</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  renderList(upcoming, container);
+  renderList(upcoming.slice(0, 5), dashList);
+}
+
+// ===== Calendar =====
+function renderCalendar() {
+  const year = calendarDate.getFullYear(), month = calendarDate.getMonth();
+  document.getElementById('cal-title').textContent = `${year}年${month + 1}月`;
+
+  if (isMobile()) {
+    document.getElementById('calendar-grid').style.display = 'none';
+    const mobileList = document.getElementById('cal-mobile-list');
+    mobileList.style.display = 'block';
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const todayStr = new Date().toISOString().split('T')[0];
+    let html = '';
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const daySchedules = schedules.filter(s => s.date === dateStr);
+      if (daySchedules.length === 0) continue;
+      const isToday = dateStr === todayStr;
+      const colors = { blue: 'var(--primary)', green: 'var(--success)', yellow: 'var(--warning)', red: 'var(--danger)' };
+      html += `<div style="margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:600;color:${isToday?'var(--primary)':'var(--text-primary)'};margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+          ${d}日 ${isToday ? '<span class="tag tag-blue" style="font-size:11px;">今天</span>' : ''}
+          <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">${daySchedules.length}个日程</span>
+        </div>
+        ${daySchedules.map(s => `<div class="schedule-item" style="margin-bottom:6px;">
+          <div class="schedule-dot" style="background:${colors[s.category]||colors.blue}"></div>
+          <div class="schedule-info"><h4>${s.title}</h4><p>${s.time || ''} ${s.note ? '· ' + s.note : ''}</p></div>
+          <div class="schedule-actions">
+            <button class="btn btn-outline btn-sm" onclick="openScheduleModal('${s.id}')">编辑</button>
+          </div>
+        </div>`).join('')}
+      </div>`;
+    }
+    if (!html) html = '<div class="empty-state" style="padding:24px;"><p>本月暂无日程</p></div>';
+    mobileList.innerHTML = html;
+    return;
+  }
+
+  document.getElementById('calendar-grid').style.display = 'grid';
+  const calMobileList = document.getElementById('cal-mobile-list');
+  if (calMobileList) calMobileList.style.display = 'none';
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrev = new Date(year, month, 0).getDate();
+  const todayStr = new Date().toISOString().split('T')[0];
+  const days = ['日', '一', '二', '三', '四', '五', '六'];
+  let html = days.map(d => `<div class="cal-header">${d}</div>`).join('');
+  for (let i = firstDay - 1; i >= 0; i--) html += `<div class="cal-day other-month"><div class="day-num">${daysInPrev - i}</div></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = dateStr === todayStr;
+    const daySchedules = schedules.filter(s => s.date === dateStr);
+    const eventsHtml = daySchedules.slice(0, 3).map(s => `<div class="cal-event ${s.category||'blue'}">${s.title}</div>`).join('') + (daySchedules.length > 3 ? `<div class="cal-event gray">+${daySchedules.length - 3}更多</div>` : '');
+    html += `<div class="cal-day ${isToday?'today':''}" onclick="openScheduleModal();document.getElementById('sche-date-input').value='${dateStr}'"><div class="day-num">${d}</div><div class="events">${eventsHtml}</div></div>`;
+  }
+  const totalCells = firstDay + daysInMonth;
+  const remaining = (7 - totalCells % 7) % 7;
+  for (let i = 1; i <= remaining; i++) html += `<div class="cal-day other-month"><div class="day-num">${i}</div></div>`;
+  document.getElementById('calendar-grid').innerHTML = html;
+}
+
+function calMove(dir) { calendarDate.setMonth(calendarDate.getMonth() + dir); renderCalendar(); }
+function calToday() { calendarDate = new Date(); renderCalendar(); }
+
+function switchScheduleTab(tab) {
+  document.querySelectorAll('#page-schedule .tab').forEach((t, i) => t.classList.toggle('active', (tab === 'calendar' && i === 0) || (tab === 'list' && i === 1)));
+  document.getElementById('sche-tab-calendar').classList.toggle('active', tab === 'calendar');
+  document.getElementById('sche-tab-list').classList.toggle('active', tab === 'list');
+}
+
+// ===== Dashboard =====
+function refreshDashboard() {
+  const now = new Date(), todayStr = now.toISOString().split('T')[0];
+  const weekLater = new Date(now.getTime() + 7 * 86400000).toISOString().split('T')[0];
+  document.getElementById('dash-date').textContent = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+  document.getElementById('stat-total').textContent = students.length;
+  document.getElementById('stat-today').textContent = schedules.filter(s => s.date === todayStr).length;
+  document.getElementById('stat-upcoming').textContent = schedules.filter(s => s.date >= todayStr && s.date <= weekLater).length;
+  document.getElementById('stat-pending').textContent = students.filter(s => {
+    const cats = s.categories || {};
+    return Object.values(cats).some(c => c && c.enabled);
+  }).length;
+
+  // Category counts
+  const catNames = ['资助', '奖助', '学业', '党建', '心理'];
+  catNames.forEach(c => {
+    const count = students.filter(s => (s.categories || {})[c] && (s.categories || {})[c].enabled).length;
+    document.getElementById('cat-count-' + c).textContent = count;
+  });
+
+  // Dashboard grid responsive
+  const dashGrid = document.getElementById('dash-grid');
+  if (isMobile()) {
+    dashGrid.style.gridTemplateColumns = '1fr';
+  } else {
+    dashGrid.style.gridTemplateColumns = '1fr 1fr';
+  }
+
+  // Student dynamic list
+  const dashStudentList = document.getElementById('dash-student-list');
+  const recentStudents = students.slice(-5).reverse();
+  if (recentStudents.length === 0) {
+    dashStudentList.innerHTML = '<div style="padding:12px;color:var(--text-tertiary);font-size:13px;text-align:center;">暂无学生数据</div>';
+  } else {
+    dashStudentList.innerHTML = recentStudents.map(s => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--separator);font-size:13px;cursor:pointer;" onclick="viewStudent('${s.id}')">
+        <span><strong>${s.name}</strong> <span style="color:var(--text-tertiary);">${s.studentId}</span></span>
+        <span class="tag tag-blue">${s.className}</span>
+      </div>`).join('');
+  }
+}
+
+// ===== Reminders =====
+function checkReminders() {
+  const now = new Date();
+  schedules.forEach(s => {
+    if (!s.time || !s.remind || s.remind === '0') return;
+    const eventTime = new Date(s.date + 'T' + s.time);
+    const diff = eventTime.getTime() - now.getTime() - parseInt(s.remind) * 60000;
+    if (diff > 0 && diff < 60000 && !remindedSet.has(s.id)) {
+      remindedSet.add(s.id);
+      document.getElementById('reminder-text').textContent = `即将开始：${s.title} (${s.time})`;
+      document.getElementById('reminder-badge').style.display = 'block';
+      setTimeout(() => { document.getElementById('reminder-badge').style.display = 'none'; }, 15000);
+      toast(`🔔 提醒：${s.title} 将在 ${s.time} 开始`);
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('🔔 日程提醒', { body: `${s.title}\n${s.date} ${s.time}` });
+      }
+    }
+  });
+}
+function dismissReminder() { document.getElementById('reminder-badge').style.display = 'none'; }
+if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+setInterval(checkReminders, 30000);
+
+// ===== Handle resize =====
+let lastIsMobile = isMobile();
+window.addEventListener('resize', () => {
+  const nowMobile = isMobile();
+  if (nowMobile !== lastIsMobile) {
+    lastIsMobile = nowMobile;
+    const activePage = document.querySelector('.page.active');
+    if (activePage) {
+      const pageName = activePage.id.replace('page-', '');
+      showPage(pageName);
+    }
+  }
+});
+
+// ===== Auth =====
+function showAuthRequired() {
+  document.getElementById('login-modal').classList.add('show');
+}
+async function autoLogin() {
+  try {
+    const res = await fetch('/api/auto-login');
+    const data = await res.json();
+    if (res.ok && data.token) {
+      Auth.setToken(data.token);
+      await init();
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+// ===== Init =====
+async function init() {
+  await Promise.all([loadStudents(), loadSchedules()]);
+  refreshDashboard(); renderStudents(); renderCalendar(); renderScheduleList();
+}
+
+// 启动：有 token 直接加载，没有则尝试自动登录
+(async () => {
+  if (Auth.isLoggedIn()) { await init(); return; }
+  const ok = await autoLogin();
+  if (!ok) showAuthRequired();
+})();
+</script>
+</body>
+</html>
